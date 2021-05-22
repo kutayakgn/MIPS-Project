@@ -1,0 +1,369 @@
+.data
+welcome_message: .asciiz "Welcome to our MIPS project!\n"
+menu_message: .asciiz "Main Menu:\n1. Count Alphabetic Characters\n2. Sort Numbers\n3. Prime (N)\n4. Huffman Coding\n5. Exit\nPlease select an option: "
+choice: .space 4
+
+Q1_prmpt1: .asciiz "Input: "
+Q1_prmpt2: .asciiz "Character"
+Q1_prmpt3: .asciiz "Occurence"
+Q1_str: .space 1000
+.align 4
+Q1_array: .space 104
+Q1_array_alphabet: .byte 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
+
+Q2_prmpt1: .asciiz "Input: "
+Q2_str: .space 1000	
+.align 2
+Q2_array: .space 100
+
+Q3_text:  .asciiz "Enter a number for num_prime(N): "
+Q3_Arr:   .word 1:1000000
+Q3_text1:  .asciiz "prime("
+Q3_text2:  .asciiz ") is "
+
+Q4_prmpt1: .asciiz "Not available"
+
+Q5_prmpt1: .asciiz "Program ends. Bye :)"
+
+space: .asciiz "\n"
+.text
+main:
+	li $v0, 4	#print massage
+	la $a0, welcome_message
+	syscall
+menu:
+	li $v0, 4 #Println() 
+	la $a0, space
+	syscall
+	
+	li $v0, 4	#print massage
+	la $a0, menu_message
+	syscall
+	
+	#Take input for menu and jump to user's choice.
+	li $v0,5
+	syscall
+	addi $a3,$v0,0
+	beq $a3,1,Q1
+	beq $a3,2,Q2
+	beq $a3,3,Q3
+	beq $a3,4,Q4
+	beq $a3,5,exit
+	
+	
+Q1:
+	li $v0, 4	#print massage
+	la $a0, Q1_prmpt1
+	syscall
+	li $v0,8	#take input
+	la $a0,Q1_str
+	la $a1,1000
+	syscall
+	
+	li $t0,0
+	Q1_loop:
+		bge $t0,1000,Q1_sort
+		la $a0, Q1_str
+		add $t1,$a0,$t0 #$A[i]
+		lb $t2,0($t1) #t2=A[i]
+		sle $t4,$t2,96 #Check the character uppercase
+		beq $t4,1,Q1_upper_case
+	Q1_lower_case:
+		addi $t2,$t2,-97 #Convert ascii the number.
+		j Q1_cont
+	Q1_upper_case:
+		addi $t2,$t2,-65 #Convert ascii the number.
+	
+	Q1_cont:
+		mul $t2,$t2,4 #Determine the index
+		lw $t3,Q1_array($t2) #Load the number 	
+		addi $t3,$t3,1	#Increase number by 1
+		sw $t3,Q1_array($t2) #Store the number
+		add $t0,$t0,1 #i++
+   		j Q1_loop
+   	
+   	
+   	
+   	
+   	Q1_sort: 	
+    		la  $t0, Q1_array      #Determine the end of the loop.
+    		add $t0, $t0,100                                
+	Q1_outterLoop:            # Iterate for each element of array.
+    		add $t1, $0, $0     
+    		la  $a0, Q1_array      
+    		la $a1,Q1_array_alphabet
+	Q1_innerLoop:                 # Compare each element of array. 
+    		lw  $t2, 0($a0)         # Current element (number)
+    		lw  $t3, 4($a0)         # Next element (number)
+    		lb $t6 ($a1)		# Current element (alphabet)
+    		lb $t7 1($a1)	 	# Next element (alphabet)
+    		slt $t5, $t2, $t3       # If current elemet is less than next element, swap them.
+    		beq $t5, $0, Q1_continue   #If not jump continue.
+    		add $t1, $0, 1          # Swapping occurs
+    		sw  $t2, 4($a0)        # Swapping
+    		sw  $t3, 0($a0)        
+    		sb $t6 1($a1)
+    		sb $t7 0($a1)
+	Q1_continue:
+    		addi $a0, $a0, 4        #Next element for compare   
+    		addi $a1,$a1,1
+    		bne  $a0, $t0, Q1_innerLoop    # Checks the end of array 
+    		bne  $t1, $0, Q1_outterLoop    # If swapping occured, jump outerLoop
+   	
+ 
+   	li $v0, 4	#print massage ("Character")
+	la $a0, Q1_prmpt2
+	syscall
+	li $v0, 11 #Print tab
+	li $a0, 9 
+	syscall 
+	li $v0, 4	#print massage ("Occurence")
+	la $a0, Q1_prmpt3
+	syscall
+	li $v0, 4 #Println() 
+	la $a0, space
+	syscall 
+   	
+   	
+   	li $t7, 0 #i=0
+   	
+   	Q1_loop1:
+		bge $t7,26,menu #Iterate 26 times
+		addi $t6,$t7,0 #Determine the address
+		mul $t6, $t6,4 
+		lw $a0,Q1_array($t6) #If the number is 0 jump next one.
+		seq $t1,$a0,0
+		beq $t1,1,Q1_loop1_jump
+		li $v0,11	#Print the letter
+		lb $a0,Q1_array_alphabet($t7)
+		syscall
+		li $v0, 11 #Print tab
+		li $a0, 9 
+		syscall 
+		li $v0, 11 #Print tab
+		li $a0, 9 
+		syscall
+ 		li $v0,1	 #Print the number
+		lw $a0, Q1_array($t6)
+		syscall 
+		li $v0, 4 #Println() 
+		la $a0, space
+		syscall 
+	Q1_loop1_jump:
+		addi $t7,$t7,1 #i++
+		j Q1_loop1
+	
+	
+	
+Q2:
+	li $v0, 4	#print massage
+	la $a0, Q2_prmpt1
+	syscall
+	li $v0,8	#take input
+	la $a0,Q2_str
+	la $a1,1000
+	syscall
+	li $t0,0 #i=0
+	li $t3,0 # number
+	li $t6,-4 #count numbers
+	li $t7,0 #negative-positive
+	Q2_loop:
+		bge $t0,100,Q2_sort
+		la $a0, Q2_str
+		add $t1,$a0,$t0 #$A[i]
+		lb $t2,0($t1) #t2=A[i]
+		beq $t2,32,Q2_new_number #if blank new number occurs
+		beq $t2 10,Q2_new_number #if end of the input, new number occurs
+		beq $t7,1, Q2_loop_cont
+		seq $t7,$t2,45 #if negative
+		beq $t7,0, Q2_loop_cont #if positive, jump continue.
+		add $t0,$t0,1 #if first character '-', load next character
+		add $t1,$a0,$t0 #$A[i]
+		lb $t2,0($t1) #t2=A[i]
+	Q2_loop_cont:
+		addi $t2,$t2,-48 #convert ascii to int
+		mul $t3,$t3,10 #shift one decimal
+		add $t3,$t3,$t2
+		add $t0,$t0,1 #i++
+   		j Q2_loop
+   	
+	Q2_new_number:
+		addi $t6,$t6,4
+		beq $t7,0,Q2_new_number_cont #if negative, multiply with -1.
+		mul $t3,$t3,-1	
+	
+	Q2_new_number_cont:
+		sw $t3, Q2_array($t6)#store the number in array
+		mul $t3,$t3,$zero
+		li $t7,0
+		add $t0,$t0,1 #i++
+		j Q2_loop
+
+
+	Q2_sort: 	
+    		la  $t0, Q2_array      	#Determine the end of the loop.
+    		add $t0, $t0, $t6                               
+	Q2_outterLoop:			# Iterate for each element of array.
+    		add $t1, $0, $0     
+    		la  $a0, Q2_array      
+	Q2_innerLoop:                  # Compare each element of array.
+    		lw  $t2, 0($a0)         # Current element
+    		lw  $t3, 4($a0)         # Next element
+    		sgt $t5, $t2, $t3       # If current elemet is bigger than next element, swap them.
+    		beq $t5, $0, Q2_continue   #If not jump continue.
+    		add $t1, $0, 1          # Swapping occurs
+    		sw  $t2, 4($a0)         # Swapping
+    		sw  $t3, 0($a0)         
+	Q2_continue:
+    		addi $a0, $a0, 4            #Next element for compare
+    		bne  $a0, $t0, Q2_innerLoop    # Checks the end of array 
+    		bne  $t1, $0, Q2_outterLoop    # If swapping occured, jump outerLoop
+    	
+    	
+    	li $t0, 0 #i
+    	div $t6,$t6,4 #counter 
+    	addi $t6,$t6,1
+    
+ 	Q2_loop1:
+		bge $t0,$t6,Q2_end #If end of the array exit
+ 		li $v0,1 #print element of the array
+ 		mul $t1, $t0,4
+		lw $a0, Q2_array($t1)
+		syscall
+		li $v0, 11 #print blank
+		li $a0, 32 
+		syscall 
+		addi $t0,$t0,1 #i++
+		j Q2_loop1
+	Q2_end:
+		li $v0, 4 #Println() 
+		la $a0, space
+		syscall	
+		j menu
+
+Q3:	
+	# Printing out the text
+	li $v0, 4
+    	la $a0, Q3_text
+    	syscall
+
+    	# Getting user input
+    	li $v0, 5
+    	syscall
+
+    	# Moving the integer input to another register
+    	move $t0, $v0
+    	addi $t2, $t0, 1
+    	addi $t3, $t0, 0
+    
+    	jal Q3_num_prime
+    
+    
+    	# Printing out the result
+    	li $v0, 4
+    	la $a0, Q3_text1
+    	syscall
+    
+    	li $v0, 1
+    	move $a0, $t3
+    	syscall
+    
+    	li $v0, 4
+    	la $a0, Q3_text2
+    	syscall
+    
+    
+    	li $v0, 1
+    	move $a0, $t9
+    	syscall
+    	li $v0, 4 #Println() 
+    	la $a0, space
+    	syscall
+
+    	# End Program
+    	j menu
+    
+    	Q3_num_prime:
+    		#index is t1 = p = 2
+    		addi $t1, $zero, 2
+    		#t8 = j
+    		#t9 = result
+    		addi $t8, $zero, 2
+    		addi $t9, $zero, 0	
+    		#t0 = Count = N-2
+    		#t1 = p = 2
+    		#t2 = N+1 
+    		#t3 = N
+    
+    	Q3_while:
+    		#t4 = p^2
+    		mul $t4, $t1, $t1
+    		#If t1==t2 exit p <=N-2
+    		bgt $t4, $t3, Q3_for
+    	
+ 	#t6 = Arr[p]
+    	sll $t1, $t1, 2
+    	lw $t6,Q3_Arr($t1)
+    	srl $t1,$t1,2
+    	
+    	beq $t6,0,Q3_increment
+    	
+    	#t7 = i = p^2
+    	mul $t7, $t1, $t1
+    	
+    	Q3_while1:
+    		
+    		#while i<=n
+    		bgt $t7,$t3,Q3_increment
+    		
+    		#Arr[i] = 0
+    		sll $t7, $t7, 2
+    		sw $zero,Q3_Arr($t7)
+    		srl $t7,$t7,2
+    		
+    		
+    		#i+=p
+    		add $t7,$t7,$t1
+    		
+    		j Q3_while1
+    	
+    	Q3_increment:
+    		#p++
+    		addi $t1, $t1, 1
+    
+    		j Q3_while
+    
+   	
+    	Q3_for:
+    		bgt $t8,$t3,Q3_exit
+    		sll $t8, $t8, 2
+    		lw $s7,Q3_Arr($t8)
+    		srl $t8,$t8,2
+    		beq $s7,0, Q3_skip
+    
+    	addi $t9, $t9, 1
+    
+    	Q3_skip: 
+    		addi $t8, $t8, 1
+    		j Q3_for
+    
+    	Q3_exit:
+    		jr $ra
+    	
+Q4:	
+	li $v0, 4	#print massage
+	la $a0, Q4_prmpt1
+	syscall
+	li $v0, 4 #Println() 
+	la $a0, space
+	syscall
+	j menu
+	
+	
+	
+exit:
+	li $v0, 4	#print massage
+	la $a0, Q5_prmpt1
+	syscall
+	li $v0, 10 #Exit from system
+	syscall
